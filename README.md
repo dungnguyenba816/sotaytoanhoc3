@@ -34,7 +34,7 @@ Không mở `index.html` trực tiếp bằng `file://`: mô-đun JavaScript, wo
 | --- | --- | --- |
 | `course_1` | Sổ tay Toán học 3 - Trọn bộ | `books/so_tay_toan_3_tron_bo.pdf` |
 
-Hai PDF được giữ nguyên. Số trang hiển thị lấy từ `PDFDocumentProxy.numPages` của PDF.js, không ghi cứng trong danh mục. Ảnh bìa SVG là minh họa riêng cho giao diện; trang sách luôn được vẽ trực tiếp từ PDF.
+Hai PDF được giữ nguyên. Số trang hiển thị lấy từ `PDFDocumentProxy.numPages` của PDF.js, không ghi cứng trong danh mục. Ảnh bìa PNG được xuất trực tiếp từ trang đầu tiên của PDF trọn bộ và hiển thị đủ trang, không cắt xén. Trang sách trong bộ đọc luôn được vẽ trực tiếp từ PDF.
 
 ```text
 index.html                Điểm vào ứng dụng
@@ -154,3 +154,5 @@ Mục tiêu nghiệm thu là các bản Chrome, Edge, Firefox và Safari hiện 
 ## Bản trọn bộ
 
 Tệp `books/so_tay_toan_3_tron_bo.pdf` gồm 40 trang, nối 20 trang Tập 1 rồi 20 trang Tập 2. Đã đối chiếu nội dung, kích thước và ảnh của từng trang với bản gốc. Hai tệp gốc được giữ nguyên; giao diện chỉ hiển thị một quyển trọn bộ. Số trang trong ứng dụng vẫn lấy trực tiếp từ PDF.js. Vị trí đã lưu ở Tập 1 giữ cùng số trang trong sách gộp.
+
+Ảnh bìa hiện tại: `assets/covers/tron-bo.png`, được PDF.js xuất từ trang 1 của sách trọn bộ. Giao diện tổng quan, thẻ sách và danh sách gần đây đều dùng ảnh này.
