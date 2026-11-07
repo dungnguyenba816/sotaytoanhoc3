@@ -48,7 +48,7 @@ class FileChecks(unittest.TestCase):
     def test_no_page_count_in_course_data(self):
         data = (ROOT / "js/courses.js").read_text()
         self.assertNotIn("totalPages", data)
-        self.assertEqual(data.count("id: 'course_"), 2)
+        self.assertEqual(data.count("id: 'course_"), 1)
 
     def test_package_is_framework_free(self):
         package = json.loads((ROOT / "package.json").read_text())

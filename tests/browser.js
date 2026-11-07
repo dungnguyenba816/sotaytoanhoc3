@@ -69,12 +69,9 @@ document.querySelector('#run').onclick = async event => {
       await wait(() => reader.active === 1 && reader.ready);
       reader.select(2); await wait(() => reader.ready);
       reader.destroy();
-      reader = new Reader(fixture, courses[1], store, () => {}); await reader.open(); await wait(() => reader.ready);
-      if (reader.active !== 1) throw new Error('Vị trí hai tập bị trộn');
-      reader.select(Math.min(3, reader.pdf.numPages)); await wait(() => reader.ready); reader.destroy();
       reader = new Reader(fixture, courses[0], store, () => {}); await reader.open(); await wait(() => reader.ready);
       if (reader.active !== 2) throw new Error('Mở lại không giữ trang đã chọn');
-      log('Đạt: điều khiển lật tới/lùi, phóng to, thanh chọn trang, focus bàn phím, con trỏ cảm ứng và khôi phục độc lập hai tập.');
+      log('Đạt: điều khiển lật tới/lùi, phóng to, thanh chọn trang, focus bàn phím, con trỏ cảm ứng và khôi phục vị trí sách trọn bộ.');
       reader.destroy();
       reader = new Reader(fixture, { ...courses[0], file: 'tests/khong-ton-tai.pdf' }, store, () => {});
       await reader.open();

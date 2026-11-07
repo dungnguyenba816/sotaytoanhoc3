@@ -6,7 +6,7 @@ import { attachMouse, isBookCorner, isBookFlipZone } from '../js/mouse.js';
 export function runCoreTests() {
   let passed = 0;
   const equal = (actual, expected, title) => { if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(`${title}: ${JSON.stringify(actual)} ≠ ${JSON.stringify(expected)}`); passed++; };
-  equal(courses.map(c => [c.id, c.file]), [['course_1', 'books/so_tay_toan_3_tap_1.pdf'], ['course_2', 'books/so_tay_toan_3_tap_2.pdf']], 'Ánh xạ hai tập');
+  equal(courses.map(c => [c.id, c.file]), [['course_1', 'books/so_tay_toan_3_tron_bo.pdf']], 'Ánh xạ hai tập');
   const db = new Map(), notices = [];
   const provider = () => ({ getItem: key => db.get(key) ?? null, setItem: (key, value) => db.set(key, value) });
   const store = new ReadingStore(message => notices.push(message), provider);

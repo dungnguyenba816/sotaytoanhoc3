@@ -1,6 +1,6 @@
 # Sổ tay Toán học 3
 
-Ứng dụng đọc hai tập sách PDF bằng HTML5, CSS3 và JavaScript thuần. Dành cho cô **Lan Thúy**, giáo viên sử dụng tài liệu để soạn bài và giảng dạy Toán lớp 3. Giao diện tiếng Việt, không cần tài khoản.
+Ứng dụng đọc một quyển PDF trọn bộ được gộp theo thứ tự Tập 1 rồi Tập 2 bằng HTML5, CSS3 và JavaScript thuần. Dành cho cô **Lan Thúy**, giáo viên sử dụng tài liệu để soạn bài và giảng dạy Toán lớp 3. Giao diện tiếng Việt, không cần tài khoản.
 
 ## 1. Chuẩn bị và chạy cục bộ
 
@@ -32,8 +32,7 @@ Không mở `index.html` trực tiếp bằng `file://`: mô-đun JavaScript, wo
 
 | Mã sách | Tên khóa học | Tệp gốc |
 | --- | --- | --- |
-| `course_1` | Sổ tay Toán học 3 - Tập 1 | `books/so_tay_toan_3_tap_1.pdf` |
-| `course_2` | Sổ tay Toán học 3 - Tập 2 | `books/so_tay_toan_3_tap_2.pdf` |
+| `course_1` | Sổ tay Toán học 3 - Trọn bộ | `books/so_tay_toan_3_tron_bo.pdf` |
 
 Hai PDF được giữ nguyên. Số trang hiển thị lấy từ `PDFDocumentProxy.numPages` của PDF.js, không ghi cứng trong danh mục. Ảnh bìa SVG là minh họa riêng cho giao diện; trang sách luôn được vẽ trực tiếp từ PDF.
 
@@ -64,10 +63,10 @@ Giao diện bộ đọc dùng JavaScript thuần; Streamlit chỉ làm lớp ph�
 
 ## 3. Các màn hình và cách sử dụng
 
-- **Tổng quan** (`#dashboard`): lời chào cô Lan Thúy, hai tập sách tham khảo cho việc giảng dạy, thống kê vị trí đọc và tài liệu mở gần đây. Chưa mở sách sẽ có trạng thái trống; đang kiểm tra PDF sẽ có thông báo tải.
-- **Tài liệu giảng dạy** (`#courses`): hai tập tài liệu và lối quay lại trang đang xem khi chuẩn bị bài.
+- **Tổng quan** (`#dashboard`): lời chào cô Lan Thúy, quyển sách trọn bộ cho việc giảng dạy, thống kê vị trí đọc và tài liệu mở gần đây. Chưa mở sách sẽ có trạng thái trống; đang kiểm tra PDF sẽ có thông báo tải.
+- **Tài liệu giảng dạy** (`#courses`): quyển tài liệu trọn bộ và lối quay lại trang đang xem khi chuẩn bị bài.
 - **Giới thiệu** (`#about`): mục đích, nguồn nội dung và cách giữ dữ liệu.
-- **Xem tài liệu** (`#reader/course_1` hoặc `#reader/course_2`): đọc PDF gốc và tiếp nối trang đã lưu.
+- **Xem tài liệu** (`#reader/course_1`): đọc PDF gốc và tiếp nối trang đã lưu.
 
 Đường dẫn dùng phần sau dấu `#`, nên tải lại và nút Quay lại của trình duyệt hoạt động với máy chủ tĩnh. Điều hướng bên hông chuyển thành danh mục thu gọn trên màn hình nhỏ. Tên Lan Thúy và ảnh đại diện không có thao tác tài khoản.
 
@@ -87,7 +86,7 @@ Các phím này không điều hướng sách khi đang thao tác với ô nhậ
 
 ## 5. Vị trí đọc và quyền riêng tư
 
-Dữ liệu nằm dưới khóa `sotaytoanhoc3.reading.v1` trong `localStorage`, riêng cho `course_1` và `course_2`:
+Dữ liệu sách trọn bộ nằm dưới khóa `sotaytoanhoc3.reading.v1` trong `localStorage`, ở bản ghi `course_1`. Bản ghi `course_2` cũ được giữ nguyên nhưng không còn hiển thị thành một sách riêng:
 
 ```json
 {
@@ -131,7 +130,7 @@ Nếu có Node hỗ trợ mô-đun hiện đại, chạy `node tests/core.test.j
 
 Mục tiêu nghiệm thu là các bản Chrome, Edge, Firefox và Safari hiện hành. Sau khi chuẩn bị thư viện, kiểm tra thủ công:
 
-- Tổng quan, hai tập tài liệu, giới thiệu, Quay lại và tải lại tại từng đường dẫn. Kiểm tra máy tính, máy tính bảng, điện thoại; không tràn ngang toàn trang, chữ rõ, Tab và viền focus dùng được.
+- Tổng quan, quyển tài liệu trọn bộ, giới thiệu, Quay lại và tải lại tại từng đường dẫn. Kiểm tra máy tính, máy tính bảng, điện thoại; không tràn ngang toàn trang, chữ rõ, Tab và viền focus dùng được.
 - Mở từng tập, đi qua mọi trang, so sánh trang đại diện với PDF gốc, gồm chữ Việt, công thức, hình và bố cục. Kiểm tra trang đầu/cuối; dùng bộ kiểm tra logic cho tài liệu một trang và số trang lẻ.
 - Lật tới/lùi bằng nút, nhấp và kéo các góc hoặc mép trái/phải bằng chuột; quan sát uốn trang và bóng. Vuốt và kéo trên màn hình cảm ứng không được lật; nút và thanh trượt vẫn phải hoạt động.
 - Chọn cả trang chẵn/lẻ trong một cặp, phóng các mức, đổi kích thước, đổi hướng máy và tải lại; vị trí phải giữ độc lập từng tập. Đến cặp cuối đạt 100%, quay lại giảm phần trăm.
@@ -151,3 +150,7 @@ Mục tiêu nghiệm thu là các bản Chrome, Edge, Firefox và Safari hiện 
 **Trang không vẽ được:** chọn **Thử lại** trên trang. Một số tài liệu hoặc thiết bị có giới hạn bộ nhớ riêng; độ nét ở mức phóng cao có thể bị giới hạn bởi ngân sách bitmap. Nội dung canvas không có lớp chọn văn bản hoặc đọc văn bản PDF bằng trình đọc màn hình; các điều khiển có nhãn và dùng bàn phím được.
 
 Ứng dụng chạy được bằng máy chủ tĩnh cục bộ hoặc trên Streamlit Community Cloud. Không đồng bộ vị trí đọc giữa thiết bị hay giữa địa chỉ cục bộ và ứng dụng trực tuyến. Dữ liệu đọc thuộc nguồn web hiện tại. PDF và thư viện đi kèm ứng dụng; bản trực tuyến tải các tệp này từ chính ứng dụng Streamlit, không qua CDN bên ngoài.
+
+## Bản trọn bộ
+
+Tệp `books/so_tay_toan_3_tron_bo.pdf` gồm 40 trang, nối 20 trang Tập 1 rồi 20 trang Tập 2. Đã đối chiếu nội dung, kích thước và ảnh của từng trang với bản gốc. Hai tệp gốc được giữ nguyên; giao diện chỉ hiển thị một quyển trọn bộ. Số trang trong ứng dụng vẫn lấy trực tiếp từ PDF.js. Vị trí đã lưu ở Tập 1 giữ cùng số trang trong sách gộp.
