@@ -74,3 +74,5 @@ window.addEventListener('pagehide', () => { reader?.destroy(); metadataControlle
 window.addEventListener('pageshow', event => { if (event.persisted) { metadataController = new AbortController(); route(); courses.forEach(readMetadata); } });
 metadataController = new AbortController(); route(); courses.forEach(readMetadata);
 if (location.protocol === 'file:') { notice.textContent = 'Hãy mở ứng dụng qua http://localhost:8000 sau khi chạy python3 -m http.server 8000. Trình duyệt không cho phép tải PDF và mô-đun qua file://.'; notice.hidden = false; }
+
+document.querySelector('#sidebar-toggle').addEventListener('click', event => { const hidden = document.body.classList.toggle('sidebar-hidden'); event.currentTarget.setAttribute('aria-expanded', String(!hidden)); });

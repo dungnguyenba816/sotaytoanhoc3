@@ -84,7 +84,7 @@ export class Reader {
     viewport.classList.toggle('is-zoomed', this.zoom > 1);
     if (this.zoom === 1) { viewport.scrollLeft = 0; viewport.scrollTop = 0; }
     const saved = this.active, width = Math.max(120, viewport.getBoundingClientRect().width - 38);
-    this.columns = width >= 700 ? 2 : 1;
+    this.columns = width >= 560 ? 2 : 1;
     const baseHeight = Math.min(680, Math.max(280, innerHeight - 310), width / this.columns / this.ratio);
     // Keep enlarged pages inside a bounded viewport; panning never scrolls the app.
     viewport.style.height = this.zoom > 1 ? Math.max(330, Math.ceil(baseHeight) + 38) + 'px' : '';
@@ -95,8 +95,8 @@ export class Reader {
         const page = document.createElement('div'); page.className = 'pdf-page'; page.dataset.page = i + 1;
         const holder = document.createElement('div'); holder.className = 'page-content'; holder.setAttribute('aria-label', `Trang ${i + 1}`); page.append(holder); return page;
       });
-      this.book.style.width = this.pageWidth * this.columns + 'px'; this.book.style.height = this.pageHeight + 'px';
-      this.flip = new this.PageFlip(this.book, { width: this.pageWidth, height: this.pageHeight, size: 'fixed', autoSize: false, startPage: saved - 1, usePortrait: true, showCover: false, drawShadow: true, maxShadowOpacity: .28, flippingTime: 650, useMouseEvents: false, mobileScrollSupport: true, showPageCorners: true, disableFlipByClick: false });
+      this.book.style.width = (this.pageWidth * this.columns + (this.columns === 2 ? 2 : 0)) + 'px'; this.book.style.height = this.pageHeight + 'px';
+      this.flip = new this.PageFlip(this.book, { width: this.pageWidth, height: this.pageHeight, size: 'fixed', autoSize: false, startPage: saved - 1, usePortrait: this.columns === 1, showCover: false, drawShadow: true, maxShadowOpacity: .28, flippingTime: 650, useMouseEvents: false, mobileScrollSupport: true, showPageCorners: true, disableFlipByClick: false });
       this.flip.on('changeState', event => {
         if (event.data === 'flipping' || event.data === 'user_fold') this.turning = true;
         if (event.data === 'read') this.turning = false;
@@ -107,8 +107,8 @@ export class Reader {
       this.detachMouse = attachMouse(this.book, this.flip, () => this.ready && ['read', 'fold_corner', 'user_fold'].includes(this.flip.getState()), { viewport, canPan: () => this.zoom > 1 });
     } else {
       this.flip.getRender().finishAnimation();
-      const settings = this.flip.getSettings(); settings.width = this.pageWidth; settings.height = this.pageHeight;
-      this.book.style.width = this.pageWidth * this.columns + 'px'; this.book.style.height = this.pageHeight + 'px';
+      const settings = this.flip.getSettings(); settings.width = this.pageWidth; settings.height = this.pageHeight; settings.usePortrait = this.columns === 1;
+      this.book.style.width = (this.pageWidth * this.columns + (this.columns === 2 ? 2 : 0)) + 'px'; this.book.style.height = this.pageHeight + 'px';
       this.book.style.minWidth = this.pageWidth + 'px'; this.book.style.minHeight = this.pageHeight + 'px';
       this.flip.update();
     }
