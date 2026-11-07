@@ -1,0 +1,11 @@
+{
+  "name": "so-tay-toan-hoc-3",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Thư viện PDF Sổ tay Toán học 3 chạy cục bộ",
+  "scripts": {
+    "test": "node tests/core.test.js",
+    "serve": "python3 -m http.server 8000"
+  }
+}

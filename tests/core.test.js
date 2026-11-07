@@ -1,0 +1,61 @@
+import { courses } from '../js/courses.js';
+import { ReadingStore, STORAGE_KEY, normalizeRecord } from '../js/storage.js';
+import { spreadIndices, spreadActive } from '../js/reader.js';
+import { attachMouse } from '../js/mouse.js';
+
+export function runCoreTests() {
+  let passed = 0;
+  const equal = (actual, expected, title) => { if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(`${title}: ${JSON.stringify(actual)} ≠ ${JSON.stringify(expected)}`); passed++; };
+  equal(courses.map(c => [c.id, c.file]), [['course_1', 'books/so_tay_toan_3_tap_1.pdf'], ['course_2', 'books/so_tay_toan_3_tap_2.pdf']], 'Ánh xạ hai tập');
+  const db = new Map(), notices = [];
+  const provider = () => ({ getItem: key => db.get(key) ?? null, setItem: (key, value) => db.set(key, value) });
+  const store = new ReadingStore(message => notices.push(message), provider);
+  equal(store.get('course_1', 20), null, 'Sách chưa mở');
+  store.save('course_1', 7, 20); store.save('course_2', 3, 21);
+  const restored = new ReadingStore(message => notices.push(message), provider);
+  equal(restored.get('course_1', 20).lastPage, 7, 'Khôi phục tập 1');
+  equal(restored.get('course_2', 21).lastPage, 3, 'Khôi phục độc lập tập 2');
+  restored.save('course_1', 20, 20);
+  equal(restored.get('course_1', 20).progress, 100, 'Trang cuối 100%');
+  restored.save('course_1', 2, 20);
+  equal(restored.get('course_1', 20).progress, 10, 'Đọc lùi giảm tiến độ');
+  equal(restored.get('course_1', 1).lastPage, 1, 'Giới hạn theo số trang thật');
+  restored.save('course_1', 500, 20);
+  equal(restored.get('course_1', 20).lastPage, 2, 'Bỏ vị trí không hợp lệ');
+  equal(normalizeRecord({ lastPage: 2, lastOpenedAt: 'sai' }, 20), null, 'Bỏ ngày hỏng');
+  equal(normalizeRecord({ lastPage: -1, lastOpenedAt: new Date().toISOString() }, 20), null, 'Bỏ trang âm');
+  db.set(STORAGE_KEY, '{hỏng');
+  const corrupt = new ReadingStore(message => notices.push(message), provider);
+  corrupt.save('course_2', 4, 10);
+  equal(corrupt.get('course_2', 10).lastPage, 4, 'Dự phòng dữ liệu hỏng');
+  const blocked = new ReadingStore(message => notices.push(message), () => { throw new Error('Bị chặn'); });
+  blocked.save('course_1', 3, 10);
+  equal(blocked.get('course_1', 10).progress, 30, 'Dự phòng lưu trữ bị chặn');
+  const quota = new ReadingStore(message => notices.push(message), () => ({ getItem: () => null, setItem: () => { throw new Error('Hết dung lượng'); } }));
+  quota.save('course_1', 8, 10);
+  equal(quota.get('course_1', 10).lastPage, 8, 'Dự phòng lỗi ghi');
+  equal(notices.length, 3, 'Thông báo lưu trữ');
+  equal(spreadIndices(3, 5, 2), [2, 3], 'Cặp trang đúng thứ tự');
+  equal(spreadIndices(4, 5, 2), [4], 'Số trang lẻ');
+  equal(spreadIndices(0, 1, 2), [0], 'PDF một trang');
+  equal(spreadIndices(3, 5, 1), [3], 'Một trang trên màn hình hẹp');
+  equal(spreadActive([18, 19], 20), 20, 'Cặp cuối kích hoạt trang cuối');
+  equal(spreadActive([4], 5), 5, 'Trang lẻ cuối hoàn tất');
+  equal(spreadActive([2, 3], 20), 3, 'Lật cặp dùng trang đầu');
+  const handlers = {}, calls = [];
+  const surface = { addEventListener: (name, fn) => { handlers[name] = fn; }, removeEventListener: name => { delete handlers[name]; }, getBoundingClientRect: () => ({ left: 0, top: 0 }), setPointerCapture() {}, hasPointerCapture: () => false };
+  const flip = { getBoundsRect: () => ({ left: 0, top: 0, width: 400, height: 300 }), startUserTouch: p => calls.push(['down', p]), userMove: (p, touch) => calls.push(['move', touch]), userStop: () => calls.push(['up']) };
+  const detach = attachMouse(surface, flip);
+  const pointer = pointerType => ({ pointerType, button: 0, clientX: 300, clientY: 280, pointerId: 1, target: { closest: () => null }, preventDefault() {} });
+  for (const type of ['touch', 'pen']) { handlers.pointerdown(pointer(type)); handlers.pointermove(pointer(type)); handlers.pointerup(pointer(type)); }
+  equal(calls.length, 0, 'Không lật bằng cảm ứng/bút');
+  equal(Object.keys(handlers).some(type => type.startsWith('touch')), false, 'Không đăng ký trình xử lý touch');
+  handlers.pointermove(pointer('mouse'));
+  equal(calls[0], ['move', false], 'Góc trang nhận hover chuột');
+  handlers.pointerdown(pointer('mouse')); handlers.pointermove(pointer('mouse')); handlers.pointerup(pointer('mouse'));
+  equal(calls.map(call => call[0]), ['move', 'down', 'move', 'up'], 'Đường đi kéo chuột');
+  detach(); equal(Object.keys(handlers), [], 'Dọn trình xử lý con trỏ');
+  return passed;
+}
+
+if (typeof document === 'undefined') console.log(`Đạt ${runCoreTests()} kiểm tra logic.`);
