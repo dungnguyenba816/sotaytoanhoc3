@@ -10,20 +10,6 @@ export function isBookCorner(point, bounds, orientation = 'landscape') {
     && (point.y <= bounds.top + size || point.y >= bottom - size);
 }
 
-function verticalScroller(element) {
-  // In Streamlit the document is inside an auto-sized iframe. Continue through
-  // its same-origin frame to find the actual scrollable parent page.
-  while (element?.ownerDocument) {
-    const doc = element.ownerDocument, root = doc.scrollingElement;
-    for (let node = element; node && node !== root; node = node.parentElement) {
-      if (node.scrollHeight > node.clientHeight + 1 && /auto|scroll/.test(doc.defaultView.getComputedStyle(node).overflowY)) return node;
-    }
-    if (root && root.scrollHeight > root.clientHeight + 1) return root;
-    try { element = doc.defaultView.frameElement; } catch { return null; }
-  }
-  return null;
-}
-
 function scrollImmediately(element, axis, value) {
   if (element.scrollTo) element.scrollTo({ [axis]: value, behavior: 'instant' });
   else element[axis === 'left' ? 'scrollLeft' : 'scrollTop'] = value;
@@ -53,9 +39,7 @@ export function attachMouse(surface, flip, enabled = () => true, { viewport = nu
     } else {
       clearHover();
       const movable = Boolean(viewport && canPan());
-      const vertical = movable ? verticalScroller(viewport) : null;
-      // Screen coordinates stay fixed when scrolling the parent moves this iframe.
-      gesture = { mode: 'pan', movable, x: e.screenX ?? e.clientX, y: e.screenY ?? e.clientY, left: viewport?.scrollLeft || 0, top: vertical?.scrollTop || 0, vertical, id: e.pointerId };
+      gesture = { mode: 'pan', movable, x: e.screenX ?? e.clientX, y: e.screenY ?? e.clientY, left: viewport?.scrollLeft || 0, top: viewport?.scrollTop || 0, id: e.pointerId };
       if (movable) surface.classList.add('is-panning');
     }
     surface.setPointerCapture(e.pointerId);
@@ -66,7 +50,7 @@ export function attachMouse(surface, flip, enabled = () => true, { viewport = nu
     if (gesture && e.pointerId !== gesture.id) return;
     if (gesture?.mode === 'pan') {
       if (gesture.movable) scrollImmediately(viewport, 'left', gesture.left + gesture.x - (e.screenX ?? e.clientX));
-      if (gesture.vertical) scrollImmediately(gesture.vertical, 'top', gesture.top + gesture.y - (e.screenY ?? e.clientY));
+      if (gesture.movable) scrollImmediately(viewport, 'top', gesture.top + gesture.y - (e.screenY ?? e.clientY));
       e.preventDefault(); return;
     }
     if (!enabled()) return;

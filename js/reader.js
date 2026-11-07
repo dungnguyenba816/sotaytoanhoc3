@@ -15,7 +15,7 @@ export class Reader {
     this.abort = new AbortController(); this.zoom = 1; this.active = 1; this.closed = false; this.ready = false;
   }
   async open() {
-    this.root.innerHTML = `<section class="reader"><div class="reader-heading"><a href="#dashboard">← Về tổng quan</a><span>TÀI LIỆU GIẢNG DẠY</span></div><h1></h1><div class="reader-status" role="status">Đang mở sách gốc…</div><div class="reader-controls" hidden><button data-action="prev" aria-label="Trang trước">← Trước</button><label>Trang <input id="page-number" type="number" min="1" aria-label="Chọn trang PDF"></label><span id="page-total"></span><button data-action="next" aria-label="Trang sau">Sau →</button><div class="zoom-controls"><button data-action="out" aria-label="Thu nhỏ">−</button><output id="zoom-value">100%</output><button data-action="in" aria-label="Phóng to">+</button></div><button data-action="fullscreen" hidden>⛶ Toàn màn hình</button><label id="outline-label" hidden>Mục lục <select id="outline"><option value="">Đến mục…</option></select></label></div><div class="reader-scroll" tabindex="0" aria-label="Nội dung sách; dùng nút Trước và Sau để lật trang" hidden><div class="book-stage"></div></div><div class="reader-bottom" hidden><input id="page-slider" type="range" min="1" value="1" aria-label="Thanh chọn trang PDF"><p id="reading-position"></p><small>Dùng chuột ở góc nhỏ để lật trang · Kéo giữa sách để di chuyển khi phóng to · Cảm ứng: dùng nút hoặc thanh chọn trang.</small></div></section>`;
+    this.root.innerHTML = `<section class="reader"><div class="reader-heading"><a href="#dashboard">← Về tổng quan</a><span>TÀI LIỆU GIẢNG DẠY</span></div><h1></h1><div class="reader-status" role="status">Đang mở sách gốc…</div><div class="reader-controls" hidden><button data-action="prev" aria-label="Trang trước">← Trước</button><label>Trang <input id="page-number" type="number" min="1" aria-label="Chọn trang PDF"></label><span id="page-total"></span><button data-action="next" aria-label="Trang sau">Sau →</button><div class="zoom-controls"><button data-action="out" aria-label="Thu nhỏ">−</button><output id="zoom-value">100%</output><button data-action="in" aria-label="Phóng to">+</button></div><button data-action="fullscreen" hidden>⛶ Toàn màn hình</button><label id="outline-label" hidden>Mục lục <select id="outline"><option value="">Đến mục…</option></select></label></div><div class="reader-scroll" tabindex="0" aria-label="Nội dung sách; dùng nút Trước và Sau để lật trang" hidden><div class="book-stage"></div></div><div class="reader-bottom" hidden><input id="page-slider" type="range" min="1" value="1" aria-label="Thanh chọn trang PDF"><p id="reading-position"></p><small>Dùng chuột ở góc nhỏ để lật trang · Kéo giữa sách để di chuyển trong khung khi phóng to · Cảm ứng: dùng nút hoặc thanh chọn trang.</small></div></section>`;
     this.root.querySelector('h1').textContent = this.course.title;
     try {
       this.pdf = await loadPDF(this.course, this.abort.signal);
@@ -83,9 +83,11 @@ export class Reader {
     const viewport = this.root.querySelector('.reader-scroll');
     viewport.classList.toggle('is-zoomed', this.zoom > 1);
     if (this.zoom === 1) { viewport.scrollLeft = 0; viewport.scrollTop = 0; }
-    const saved = this.active, width = Math.max(180, viewport.clientWidth - 36);
+    const saved = this.active, width = Math.max(180, viewport.getBoundingClientRect().width - 38);
     this.columns = width >= 700 ? 2 : 1;
     const baseHeight = Math.min(680, Math.max(280, innerHeight - 310), width / this.columns / this.ratio);
+    // Keep enlarged pages inside a bounded viewport; panning never scrolls the app.
+    viewport.style.height = this.zoom > 1 ? Math.max(330, Math.ceil(baseHeight) + 38) + 'px' : '';
     this.pageHeight = Math.round(baseHeight * this.zoom); this.pageWidth = Math.round(this.pageHeight * this.ratio);
     if (initial) {
       const stage = this.root.querySelector('.book-stage'); this.book = document.createElement('div'); this.book.className = 'flip-book'; stage.append(this.book);

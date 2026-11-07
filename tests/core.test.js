@@ -64,10 +64,15 @@ export function runCoreTests() {
   handlers.pointerdown(pointer('mouse', 200, 150)); handlers.pointermove(pointer('mouse')); handlers.pointerup(pointer('mouse'));
   equal(calls.length, 0, 'Kéo từ giữa đến góc không chuyển thành lật');
   detach(); equal(Object.keys(handlers), [], 'Dọn trình xử lý con trỏ');
-  const viewport = { scrollLeft: 100 };
+  const outside = { scrollTop: 250 };
+  const viewport = { scrollLeft: 100, scrollTop: 50, ownerDocument: { scrollingElement: outside } };
   const detachPan = attachMouse(surface, flip, () => true, { viewport });
-  handlers.pointerdown(pointer('mouse', 200, 150)); handlers.pointermove(pointer('mouse', 140, 150));
+  handlers.pointerdown(pointer('mouse', 200, 150)); handlers.pointermove(pointer('mouse', 140, 90));
   equal(viewport.scrollLeft, 160, 'Kéo giữa sách di chuyển vùng xem');
+  equal(viewport.scrollTop, 110, 'Kéo lên di chuyển nội dung trong sách');
+  handlers.pointermove(pointer('mouse', 140, 190));
+  equal(viewport.scrollTop, 10, 'Kéo xuống di chuyển nội dung trong sách');
+  equal(outside.scrollTop, 250, 'Kéo sách không cuộn trang ngoài');
   equal(classes.has('is-panning'), true, 'Con trỏ đang kéo');
   handlers.pointerup(pointer('mouse', 140, 150));
   equal(calls.length, 0, 'Di chuyển sách không gọi thư viện lật');
