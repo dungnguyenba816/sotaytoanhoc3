@@ -27,6 +27,13 @@ const { chromium } = require(process.env.PLAYWRIGHT_PACKAGE || process.argv[2] |
     if (await frame.locator('#page-number').inputValue() === beforeEdge) throw new Error('Embedded right side did not flip');
     await page.mouse.click(book.x + 4, book.y + book.height / 2); await page.waitForTimeout(1000);
     if (await frame.locator('#page-number').inputValue() !== beforeEdge) throw new Error('Embedded left side did not flip back');
+    await frame.getByRole('button', { name: 'Lật trang sau', exact: true }).click();
+    await page.waitForTimeout(80);
+    if (!await frame.locator('.stf__item').evaluateAll(items => items.some(el => el.style.clipPath.startsWith('polygon')))) throw new Error('Embedded side button skipped the flip animation');
+    await page.waitForTimeout(900);
+    if (await frame.locator('#page-number').inputValue() === beforeEdge) throw new Error('Embedded right button did not turn');
+    await frame.getByRole('button', { name: 'Lật trang trước', exact: true }).click(); await page.waitForTimeout(1000);
+    if (await frame.locator('#page-number').inputValue() !== beforeEdge) throw new Error('Embedded left button did not turn back');
     await frame.getByRole('button', { name: 'Phóng to', exact: true }).click();
     if (await frame.locator('.reader-scroll').evaluate(el => getComputedStyle(el).overflowX !== 'auto')) throw new Error('Zoom scrolling disabled');
     await frame.getByRole('button', { name: 'Thu nhỏ', exact: true }).click();

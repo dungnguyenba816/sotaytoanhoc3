@@ -34,6 +34,17 @@ const server = http.createServer((request, response) => {
     await page.locator('.reader-status').waitFor({ state: 'hidden', timeout: 30000 });
     const book = await page.locator('.flip-book').boundingBox();
     const activePage = await page.locator('#page-number').inputValue();
+    if (!await page.getByRole('button', { name: 'Lật trang trước', exact: true }).isDisabled()) throw new Error('Left side button must be disabled on the first page');
+    await page.getByRole('button', { name: 'Lật trang sau', exact: true }).click();
+    await page.waitForTimeout(80);
+    if (!await page.locator('.stf__item').evaluateAll(items => items.some(el => el.style.clipPath.startsWith('polygon')))) throw new Error('Side button skipped the page-flip animation');
+    await page.waitForTimeout(900);
+    if (await page.locator('#page-number').inputValue() === activePage) throw new Error('Right side button did not turn the page');
+    await page.getByRole('button', { name: 'Lật trang trước', exact: true }).click();
+    await page.waitForTimeout(80);
+    if (!await page.locator('.stf__item').evaluateAll(items => items.some(el => el.style.clipPath.startsWith('polygon')))) throw new Error('Left side button skipped the animation');
+    await page.waitForTimeout(900);
+    if (await page.locator('#page-number').inputValue() !== activePage) throw new Error('Left side button did not turn back');
     await page.mouse.click(book.x + book.width * .75, book.y + book.height / 2);
     await page.waitForTimeout(700);
     if (await page.locator('#page-number').inputValue() !== activePage) throw new Error('Middle click flipped a page');
@@ -104,6 +115,16 @@ const server = http.createServer((request, response) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.waitForTimeout(500);
     if (await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)) throw new Error('Mobile document overflows horizontally');
+    for (let i = 0; i < 4; i++) await page.getByRole('button', { name: 'Thu nhỏ', exact: true }).click();
+    await page.setViewportSize({ width: 320, height: 844 });
+    await page.waitForTimeout(500);
+    for (const label of ['Lật trang trước', 'Lật trang sau']) {
+      const button = await page.getByRole('button', { name: label, exact: true }).boundingBox();
+      if (!button || button.x < 0 || button.x + button.width > 320) throw new Error('Side buttons do not fit the narrow screen');
+    }
+    if (await page.locator('.reader-scroll').evaluate(el => getComputedStyle(el).overflowX !== 'hidden' || getComputedStyle(el).overflowY !== 'hidden')) throw new Error('Internal scrollbars enabled at 100% on mobile');
+    await page.locator('#page-slider').evaluate(el => { el.value = el.max; el.dispatchEvent(new Event('change', { bubbles: true })); });
+    if (!await page.getByRole('button', { name: 'Lật trang sau', exact: true }).isDisabled()) throw new Error('Right side button must be disabled at the end');
     console.log('Đạt: giao diện giáo viên, nội dung giới thiệu, thanh cuộn theo mức phóng và bố cục điện thoại.');
   } finally { await browser?.close(); server.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
