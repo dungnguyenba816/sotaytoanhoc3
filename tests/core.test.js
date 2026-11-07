@@ -1,7 +1,7 @@
 import { courses } from '../js/courses.js';
 import { ReadingStore, STORAGE_KEY, normalizeRecord } from '../js/storage.js';
 import { spreadIndices, spreadActive } from '../js/reader.js';
-import { attachMouse, isBookCorner } from '../js/mouse.js';
+import { attachMouse, isBookCorner, isBookFlipZone } from '../js/mouse.js';
 
 export function runCoreTests() {
   let passed = 0;
@@ -48,6 +48,10 @@ export function runCoreTests() {
   const portrait = { ...bounds, left: -200 };
   equal(isBookCorner({ x: 1, y: 1 }, portrait, 'portrait'), true, 'Góc trái trang đơn');
   equal(isBookCorner({ x: -195, y: 1 }, portrait, 'portrait'), false, 'Không nhận nửa sách ẩn');
+  for (const x of [1, 399]) equal(isBookFlipZone({ x, y: 150 }, bounds), true, 'Mép trái/phải lật trang');
+  for (const x of [30, 200, 370]) equal(isBookFlipZone({ x, y: 150 }, bounds), false, 'Giữa sách vẫn dành để kéo');
+  equal(isBookFlipZone({ x: 1, y: 150 }, portrait, 'portrait'), true, 'Mép trái trang đơn');
+  equal(isBookFlipZone({ x: -195, y: 150 }, portrait, 'portrait'), false, 'Mép trang ẩn không nhận thao tác');
   const handlers = {}, calls = [], classes = new Set();
   const surface = { classList: { add: name => classes.add(name), remove: name => classes.delete(name) }, addEventListener: (name, fn) => { handlers[name] = fn; }, removeEventListener: name => { delete handlers[name]; }, getBoundingClientRect: () => ({ left: 0, top: 0 }), setPointerCapture() {}, hasPointerCapture: () => false };
   const flip = { getBoundsRect: () => ({ left: 0, top: 0, width: 400, height: 300 }), startUserTouch: p => calls.push(['down', p]), userMove: (p, touch) => calls.push(['move', touch]), userStop: () => calls.push(['up']) };
@@ -80,6 +84,10 @@ export function runCoreTests() {
   handlers.pointerdown(pointer('mouse')); handlers.pointermove(pointer('mouse', 150, 150)); handlers.pointerup(pointer('mouse', 150, 150));
   equal(calls.map(call => call[0]), ['down', 'move', 'up'], 'Kéo từ góc qua giữa vẫn lật');
   equal(viewport.scrollLeft, 160, 'Kéo góc không cuộn sách');
+  calls.length = 0;
+  handlers.pointerdown(pointer('mouse', 399, 150)); handlers.pointermove(pointer('mouse', 150, 150)); handlers.pointerup(pointer('mouse', 150, 150));
+  equal(calls.map(call => call[0]), ['down', 'move', 'up'], 'Kéo mép trang để lật');
+  equal(viewport.scrollLeft, 160, 'Kéo mép không di chuyển khung sách');
   detachPan();
   return passed;
 }

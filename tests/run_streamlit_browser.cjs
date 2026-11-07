@@ -19,6 +19,14 @@ const { chromium } = require(process.env.PLAYWRIGHT_PACKAGE || process.argv[2] |
       const timeout = setTimeout(() => { clearInterval(interval); reject(new Error('Page did not turn')); }, 10000);
       const interval = setInterval(() => { if (Number(el.value) > 1) { clearTimeout(timeout); clearInterval(interval); resolve(); } }, 50);
     }));
+    await frame.locator('.reader-status').waitFor({ state: 'hidden', timeout: 30000 });
+    await page.waitForTimeout(700);
+    const beforeEdge = await frame.locator('#page-number').inputValue();
+    const book = await frame.locator('.flip-book').boundingBox();
+    await page.mouse.click(book.x + book.width - 4, book.y + book.height / 2); await page.waitForTimeout(1000);
+    if (await frame.locator('#page-number').inputValue() === beforeEdge) throw new Error('Embedded right side did not flip');
+    await page.mouse.click(book.x + 4, book.y + book.height / 2); await page.waitForTimeout(1000);
+    if (await frame.locator('#page-number').inputValue() !== beforeEdge) throw new Error('Embedded left side did not flip back');
     await frame.getByRole('button', { name: 'Phóng to', exact: true }).click();
     if (await frame.locator('.reader-scroll').evaluate(el => getComputedStyle(el).overflowX !== 'auto')) throw new Error('Zoom scrolling disabled');
     await frame.getByRole('button', { name: 'Thu nhỏ', exact: true }).click();

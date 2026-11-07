@@ -10,6 +10,17 @@ export function isBookCorner(point, bounds, orientation = 'landscape') {
     && (point.y <= bounds.top + size || point.y >= bottom - size);
 }
 
+export function isBookFlipZone(point, bounds, orientation = 'landscape') {
+  if (isBookCorner(point, bounds, orientation)) return true;
+  const pageWidth = bounds.pageWidth ?? bounds.width / 2;
+  const left = bounds.left + (orientation === 'portrait' ? pageWidth : 0);
+  const right = bounds.left + bounds.width;
+  const edgeWidth = Math.min(20, pageWidth * .08);
+  return point.y >= bounds.top && point.y <= bounds.top + bounds.height
+    && point.x >= left && point.x <= right
+    && (point.x <= left + edgeWidth || point.x >= right - edgeWidth);
+}
+
 function scrollImmediately(element, axis, value) {
   if (element.scrollTo) element.scrollTo({ [axis]: value, behavior: 'instant' });
   else element[axis === 'left' ? 'scrollLeft' : 'scrollTop'] = value;
@@ -18,9 +29,9 @@ function scrollImmediately(element, axis, value) {
 export function attachMouse(surface, flip, enabled = () => true, { viewport = null, canPan = () => true } = {}) {
   let gesture = null, hovering = false;
   const point = e => { const rect = surface.getBoundingClientRect(); return { x: e.clientX - rect.left, y: e.clientY - rect.top }; };
-  const corner = p => isBookCorner(p, flip.getBoundsRect(), flip.getOrientation?.() || 'landscape');
+  const flipZone = p => isBookFlipZone(p, flip.getBoundsRect(), flip.getOrientation?.() || 'landscape');
   const clearHover = () => {
-    surface.classList.remove('is-flip-corner');
+    surface.classList.remove('is-flip-zone');
     if (hovering) { hovering = false; flip.userMove({ x: -1000, y: -1000 }, false); }
   };
   const release = () => {
@@ -33,7 +44,7 @@ export function attachMouse(surface, flip, enabled = () => true, { viewport = nu
     const p = point(e), bounds = flip.getBoundsRect();
     const left = bounds.left + (flip.getOrientation?.() === 'portrait' ? bounds.pageWidth : 0);
     if (p.x < left || p.x > bounds.left + bounds.width || p.y < bounds.top || p.y > bounds.top + bounds.height) return;
-    if (corner(p)) {
+    if (flipZone(p)) {
       gesture = { mode: 'flip', start: p, id: e.pointerId, dragged: false };
       flip.startUserTouch(p);
     } else {
@@ -58,8 +69,11 @@ export function attachMouse(surface, flip, enabled = () => true, { viewport = nu
     if (gesture?.mode === 'flip') {
       gesture.dragged ||= Math.hypot(p.x - gesture.start.x, p.y - gesture.start.y) > 5;
       flip.userMove(p, false);
-    } else if (!e.buttons && corner(p)) {
-      hovering = true; surface.classList.add('is-flip-corner'); flip.userMove(p, false);
+    } else if (!e.buttons && flipZone(p)) {
+      const bounds = flip.getBoundsRect();
+      const hover = isBookCorner(p, bounds, flip.getOrientation?.() || 'landscape') ? p
+        : { x: p.x, y: p.y < bounds.top + bounds.height / 2 ? bounds.top + 1 : bounds.top + bounds.height - 1 };
+      hovering = true; surface.classList.add('is-flip-zone'); flip.userMove(hover, false);
     } else clearHover();
   };
   const up = e => {
