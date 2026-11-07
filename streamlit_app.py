@@ -12,7 +12,7 @@ mimetypes.add_type("text/javascript", ".mjs")
 mimetypes.add_type("application/wasm", ".wasm")
 
 st.set_page_config(
-    page_title="Sổ tay Toán học 3",
+    page_title="Sổ tay Toán học Lớp 3",
     page_icon="📚",
     layout="wide",
     initial_sidebar_state="collapsed",

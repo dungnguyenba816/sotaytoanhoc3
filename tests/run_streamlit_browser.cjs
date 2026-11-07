@@ -12,7 +12,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_PACKAGE || process.argv[2] |
     await page.waitForTimeout(1500);
     const height = (await iframe.boundingBox()).height;
     if (height < 400) throw new Error('Streamlit component did not report its height');
-    await frame.getByRole('link', { name: 'Sổ tay Toán học 3 - Trọn bộ', exact: true }).click();
+    await frame.getByRole('link', { name: 'Sổ tay Toán học Lớp 3 - Trọn bộ', exact: true }).click();
     await frame.locator('.reader-status').waitFor({ state: 'hidden', timeout: 30000 });
     await frame.getByRole('button', { name: 'Trang sau', exact: true }).click();
     await frame.locator('#page-number').evaluate(el => new Promise((resolve, reject) => {
