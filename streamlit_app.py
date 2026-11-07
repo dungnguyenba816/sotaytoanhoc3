@@ -5,7 +5,7 @@ from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 
-from web_bundle import build_web_bundle
+from web_bundle import build_web_bundle, web_bundle_version
 
 ROOT = Path(__file__).resolve().parent
 mimetypes.add_type("text/javascript", ".mjs")
@@ -19,8 +19,8 @@ st.set_page_config(
 )
 
 
-@st.cache_resource
-def component_directory():
+@st.cache_resource(max_entries=1)
+def component_directory(version):
     return build_web_bundle(ROOT)
 
 
@@ -34,5 +34,5 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-ebook_library = components.declare_component("ebook_library", path=component_directory())
+ebook_library = components.declare_component("ebook_library", path=component_directory(web_bundle_version(ROOT)))
 ebook_library(key="ebook_library", default=None)

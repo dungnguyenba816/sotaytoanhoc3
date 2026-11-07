@@ -6,6 +6,13 @@ import tempfile
 PUBLIC_DIRECTORIES = ("assets", "books", "js", "styles", "vendor")
 
 
+def web_bundle_version(source):
+    source = Path(source)
+    files = [source / "index.html"]
+    files.extend(path for name in PUBLIC_DIRECTORIES for path in (source / name).rglob("*") if path.is_file())
+    return tuple((path.relative_to(source).as_posix(), path.stat().st_mtime_ns, path.stat().st_size) for path in sorted(files))
+
+
 def build_web_bundle(source, destination=None):
     source = Path(source)
     target = Path(destination) if destination is not None else Path(tempfile.mkdtemp(prefix="sotay-web-"))

@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from web_bundle import build_web_bundle
+from web_bundle import build_web_bundle, web_bundle_version
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -21,6 +21,10 @@ class BundleChecks(unittest.TestCase):
             self.assertTrue((target / "vendor/pdfjs/pdf.worker.mjs").is_file())
             self.assertFalse((target / ".streamlit/secrets.toml").exists())
             self.assertFalse((target / "streamlit_app.py").exists())
+            previous_version = web_bundle_version(target)
+            asset = target / "js/mouse.js"
+            asset.write_text(asset.read_text() + "\n// Bản cập nhật kiểm tra bộ nhớ đệm\n")
+            self.assertNotEqual(web_bundle_version(target), previous_version)
 
 
 if __name__ == "__main__":

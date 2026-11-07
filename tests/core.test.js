@@ -1,7 +1,7 @@
 import { courses } from '../js/courses.js';
 import { ReadingStore, STORAGE_KEY, normalizeRecord } from '../js/storage.js';
 import { spreadIndices, spreadActive } from '../js/reader.js';
-import { attachMouse } from '../js/mouse.js';
+import { attachMouse, isBookCorner } from '../js/mouse.js';
 
 export function runCoreTests() {
   let passed = 0;
@@ -42,11 +42,17 @@ export function runCoreTests() {
   equal(spreadActive([18, 19], 20), 20, 'Cặp cuối kích hoạt trang cuối');
   equal(spreadActive([4], 5), 5, 'Trang lẻ cuối hoàn tất');
   equal(spreadActive([2, 3], 20), 3, 'Lật cặp dùng trang đầu');
-  const handlers = {}, calls = [];
-  const surface = { addEventListener: (name, fn) => { handlers[name] = fn; }, removeEventListener: name => { delete handlers[name]; }, getBoundingClientRect: () => ({ left: 0, top: 0 }), setPointerCapture() {}, hasPointerCapture: () => false };
+  const bounds = { left: 0, top: 0, width: 400, height: 300, pageWidth: 200 };
+  for (const [x, y] of [[1, 1], [399, 1], [1, 299], [399, 299]]) equal(isBookCorner({ x, y }, bounds), true, 'Bốn góc ngoài');
+  for (const [x, y] of [[200, 1], [399, 150], [300, 280], [100, 150], [-1, 1]]) equal(isBookCorner({ x, y }, bounds), false, 'Ngoài góc nhỏ không lật');
+  const portrait = { ...bounds, left: -200 };
+  equal(isBookCorner({ x: 1, y: 1 }, portrait, 'portrait'), true, 'Góc trái trang đơn');
+  equal(isBookCorner({ x: -195, y: 1 }, portrait, 'portrait'), false, 'Không nhận nửa sách ẩn');
+  const handlers = {}, calls = [], classes = new Set();
+  const surface = { classList: { add: name => classes.add(name), remove: name => classes.delete(name) }, addEventListener: (name, fn) => { handlers[name] = fn; }, removeEventListener: name => { delete handlers[name]; }, getBoundingClientRect: () => ({ left: 0, top: 0 }), setPointerCapture() {}, hasPointerCapture: () => false };
   const flip = { getBoundsRect: () => ({ left: 0, top: 0, width: 400, height: 300 }), startUserTouch: p => calls.push(['down', p]), userMove: (p, touch) => calls.push(['move', touch]), userStop: () => calls.push(['up']) };
   const detach = attachMouse(surface, flip);
-  const pointer = pointerType => ({ pointerType, button: 0, clientX: 300, clientY: 280, pointerId: 1, target: { closest: () => null }, preventDefault() {} });
+  const pointer = (pointerType, clientX = 391, clientY = 291) => ({ pointerType, button: 0, clientX, clientY, pointerId: 1, target: { closest: () => null }, preventDefault() {} });
   for (const type of ['touch', 'pen']) { handlers.pointerdown(pointer(type)); handlers.pointermove(pointer(type)); handlers.pointerup(pointer(type)); }
   equal(calls.length, 0, 'Không lật bằng cảm ứng/bút');
   equal(Object.keys(handlers).some(type => type.startsWith('touch')), false, 'Không đăng ký trình xử lý touch');
@@ -54,7 +60,22 @@ export function runCoreTests() {
   equal(calls[0], ['move', false], 'Góc trang nhận hover chuột');
   handlers.pointerdown(pointer('mouse')); handlers.pointermove(pointer('mouse')); handlers.pointerup(pointer('mouse'));
   equal(calls.map(call => call[0]), ['move', 'down', 'move', 'up'], 'Đường đi kéo chuột');
+  handlers.pointerleave(pointer('mouse')); calls.length = 0;
+  handlers.pointerdown(pointer('mouse', 200, 150)); handlers.pointermove(pointer('mouse')); handlers.pointerup(pointer('mouse'));
+  equal(calls.length, 0, 'Kéo từ giữa đến góc không chuyển thành lật');
   detach(); equal(Object.keys(handlers), [], 'Dọn trình xử lý con trỏ');
+  const viewport = { scrollLeft: 100 };
+  const detachPan = attachMouse(surface, flip, () => true, { viewport });
+  handlers.pointerdown(pointer('mouse', 200, 150)); handlers.pointermove(pointer('mouse', 140, 150));
+  equal(viewport.scrollLeft, 160, 'Kéo giữa sách di chuyển vùng xem');
+  equal(classes.has('is-panning'), true, 'Con trỏ đang kéo');
+  handlers.pointerup(pointer('mouse', 140, 150));
+  equal(calls.length, 0, 'Di chuyển sách không gọi thư viện lật');
+  equal(classes.has('is-panning'), false, 'Kết thúc kéo');
+  handlers.pointerdown(pointer('mouse')); handlers.pointermove(pointer('mouse', 150, 150)); handlers.pointerup(pointer('mouse', 150, 150));
+  equal(calls.map(call => call[0]), ['down', 'move', 'up'], 'Kéo từ góc qua giữa vẫn lật');
+  equal(viewport.scrollLeft, 160, 'Kéo góc không cuộn sách');
+  detachPan();
   return passed;
 }
 
