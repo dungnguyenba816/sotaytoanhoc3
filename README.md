@@ -61,14 +61,9 @@ tests/                    Kiểm tra cấu trúc, logic và vẽ PDF
 
 Giao diện bộ đọc dùng JavaScript thuần; Streamlit chỉ làm lớp phục vụ khi triển khai trực tuyến. Không có hệ thống đăng nhập, LMS, SCORM hay dịch vụ theo dõi.
 
-## 3. Các màn hình và cách sử dụng
+## 3. Mở sách trực tiếp
 
-- **Tổng quan** (`#dashboard`): lời chào cô Lan Thúy, quyển sách trọn bộ cho việc giảng dạy, thống kê vị trí đọc và tài liệu mở gần đây. Chưa mở sách sẽ có trạng thái trống; đang kiểm tra PDF sẽ có thông báo tải.
-- **Tài liệu giảng dạy** (`#courses`): quyển tài liệu trọn bộ và lối quay lại trang đang xem khi chuẩn bị bài.
-- **Giới thiệu** (`#about`): mục đích, nguồn nội dung và cách giữ dữ liệu.
-- **Xem tài liệu** (`#reader/course_1`): đọc PDF gốc và tiếp nối trang đã lưu.
-
-Đường dẫn dùng phần sau dấu `#`, nên tải lại và nút Quay lại của trình duyệt hoạt động với máy chủ tĩnh. Điều hướng bên hông chuyển thành danh mục thu gọn trên màn hình nhỏ. Tên Lan Thúy và ảnh đại diện không có thao tác tài khoản.
+Ứng dụng mở ngay **Sổ tay Toán học Lớp 3 - Trọn bộ** tại `#reader/course_1`, không còn tổng quan, thư viện, giới thiệu hay thanh bên. Các liên kết cũ đều chuyển về quyển trọn bộ. Vị trí đọc được khôi phục từ trình duyệt.
 
 ## 4. Lật trang và điều khiển bộ đọc
 
@@ -80,7 +75,7 @@ Bộ đọc hiển thị hai trang khi đủ rộng và một trang khi hẹp. �
 | --- | --- |
 | Mũi tên trái / phải | Lật trước / sau |
 | Home / End | Chọn trang đầu / cuối |
-| Escape | Thoát toàn màn hình; nếu không toàn màn hình thì về tổng quan |
+| Escape | Thoát toàn màn hình nếu đang bật |
 
 Các phím này không điều hướng sách khi đang thao tác với ô nhập, thanh trượt, nút, liên kết, danh sách chọn hoặc vùng chỉnh sửa. Nút toàn màn hình chỉ hiện khi trình duyệt hỗ trợ. Mục lục chỉ xuất hiện nếu PDF có các đích mục lục giải được; không tự tạo chương từ nội dung.
 
@@ -156,3 +151,7 @@ Mục tiêu nghiệm thu là các bản Chrome, Edge, Firefox và Safari hiện 
 Tệp `books/so_tay_toan_3_tron_bo.pdf` gồm 40 trang, nối 20 trang Tập 1 rồi 20 trang Tập 2. Đã đối chiếu nội dung, kích thước và ảnh của từng trang với bản gốc. Hai tệp gốc được giữ nguyên; giao diện chỉ hiển thị một quyển trọn bộ. Số trang trong ứng dụng vẫn lấy trực tiếp từ PDF.js. Vị trí đã lưu ở Tập 1 giữ cùng số trang trong sách gộp.
 
 Ảnh bìa hiện tại: `assets/covers/tron-bo.png`, được PDF.js xuất từ trang 1 của sách trọn bộ. Giao diện tổng quan, thẻ sách và danh sách gần đây đều dùng ảnh này.
+
+## Giao diện chỉ đọc sách
+
+Ứng dụng hiện mở thẳng **Sổ tay Toán học Lớp 3 - Trọn bộ**, không còn tổng quan, thư viện, giới thiệu hoặc thanh bên. Các liên kết cũ cũng mở quyển trọn bộ. Giữ nguyên vị trí đã đọc, các nút lật có hiệu ứng, phóng to và kéo nội dung trong khung. Escape chỉ thoát toàn màn hình.

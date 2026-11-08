@@ -27,10 +27,8 @@ const server = http.createServer((request, response) => {
     console.log(results);
     if (results.includes('KHÔNG ĐẠT')) throw new Error('Browser integration tests failed');
     await page.goto(base);
-    await page.getByRole('heading', { name: 'Chào cô Lan Thúy' }).waitFor();
-    await page.goto(base + '/#about');
-    if ((await page.locator('main').innerText()).includes('ảnh đại diện')) throw new Error('Removed About copy is still visible');
-    await page.goto(base + '/#reader/course_1');
+    await page.getByRole('heading', { name: 'Sổ tay Toán học Lớp 3 - Trọn bộ', exact: true }).waitFor();
+    if (await page.locator('.sidebar').count()) throw new Error('Dashboard sidebar still exists');
     await page.locator('.reader-status').waitFor({ state: 'hidden', timeout: 30000 });
     const book = await page.locator('.flip-book').boundingBox();
     const activePage = await page.locator('#page-number').inputValue();

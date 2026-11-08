@@ -8,11 +8,10 @@ const { chromium } = require(process.env.PLAYWRIGHT_PACKAGE || process.argv[2] |
     const iframe = page.locator('iframe[title*="ebook_library"]');
     await iframe.waitFor({ timeout: 60000 });
     const frame = await iframe.contentFrame();
-    await frame.getByRole('heading', { name: 'Chào cô Lan Thúy' }).waitFor({ timeout: 30000 });
+    await frame.getByRole('heading', { name: 'Sổ tay Toán học Lớp 3 - Trọn bộ', exact: true }).waitFor({ timeout: 30000 });
     await page.waitForTimeout(1500);
     const height = (await iframe.boundingBox()).height;
     if (height < 400) throw new Error('Streamlit component did not report its height');
-    await frame.getByRole('link', { name: 'Sổ tay Toán học Lớp 3 - Trọn bộ', exact: true }).click();
     await frame.locator('.reader-status').waitFor({ state: 'hidden', timeout: 30000 });
     await frame.getByRole('button', { name: 'Trang sau', exact: true }).click();
     await frame.locator('#page-number').evaluate(el => new Promise((resolve, reject) => {
